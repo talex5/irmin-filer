@@ -89,6 +89,9 @@ module Make (I : Irmin.BASIC with type key = string list and type value = string
       I.of_commit_id repo.task_maker head repo.r
       >|= fun store -> { repo; store }
 
+    let iter t fn =
+      I.iter (t.store "iter") fn
+
     let history ?depth t =
       let store = t.store "Read history" in
       let open Git_storage_s in

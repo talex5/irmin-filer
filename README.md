@@ -1,7 +1,16 @@
-CueKeeper
-=========
+Irmin Filer
+===========
 
 Copyright Thomas Leonard, 2015
+
+This is an **experimental** web-based Irmin file editor.
+It can clone an Irmin repository from a server and edit the files locally.
+Changes can be sync'd with the server. 
+Files can be edited while offline and sync'd later.
+If the repository is open in multiple tabs, the tabs will stay in sync.
+It can also run without any server, as a local notebook.
+
+Note: for a more complete example, see [CueKeeper][] (in fact, this project was hacked together quickly by starting from CueKeeper and removing most of the code...).
 
 
 Installation
@@ -25,7 +34,7 @@ Pin a few patches we require:
 
 Install the dependencies:
 
-    opam install sexplib uuidm irmin tyxml reactiveData js_of_ocaml omd base64 tar-format crunch cohttp irmin-indexeddb ounit mirage-http
+    opam install sexplib irmin tyxml reactiveData js_of_ocaml base64 tar-format crunch cohttp irmin-indexeddb ounit mirage-http
 
 Build:
 
@@ -37,9 +46,23 @@ Load `test.html` in a browser to test locally (no server required).
 Instructions
 ------------
 
-Instructions for using CueKeeper can be found here:
+Open the `test.html` file in a browser.
+A local Irmin repository is created in the browser and the display shows the current state of the `master` branch.
+The left column shows the files, arranged in a tree.
+Click on a file to view it.
+Click on a `+` sign to create a new file.
+To create a directory, create a file with a `/` in its name (e.g. creating `/foo/bar/baz` will create the two required directories automatically.)
 
-http://roscidus.com/blog/blog/2015/04/28/cuekeeper-gitting-things-done-in-the-browser/
+To edit a file, click the `(edit)` button and edit the text.
+To rename or move a file, click on the panel title and enter the new path.
+You can also move a file by clicking on the name of its parent directory and choosing a new parent from the menu.
+
+There are some buttons along the top:
+
+* **Sync** will synchronise with the server (if running without a server, this is not shown).
+* **Export** allows you to save the current revision as a tar archive.
+* **Show history** shows the Irmin history, which also allows visiting previous states and reverting changes.
+* **Close all** closes all open panels in the right column.
 
 
 Running a server
@@ -86,7 +109,7 @@ as the "Common Name" (for testing, you could use "localhost" here and generate a
 
 To run the server:
 
-    ./server/mir-cuekeeper
+    ./server/mir-irmin-filer
 
 By default the server listens on TCP port 8443, but this can be changed by editing `server/unikernel.ml`.
 
@@ -121,7 +144,7 @@ In fact, the server is a [Mirage unikernel][mirage] and can also be compiled and
 
     make server MIRAGE_FLAGS="--xen"
     cd server
-    xl create -c cuekeeper.xl
+    xl create -c irmin-filer.xl
 
 
 Bugs
@@ -133,7 +156,7 @@ http://lists.xenproject.org/cgi-bin/mailman/listinfo/mirageos-devel
 
 Bugs can be reported on the mailing list or as GitHub issues:
 
-https://github.com/talex5/cuekeeper/issues
+https://github.com/talex5/irmin-filer/issues
 
 
 Conditions
@@ -159,10 +182,6 @@ This project includes Foundation (http://foundation.zurb.com). These files
 are released under the MIT license.
 
 
-This project includes the Pikaday date picker (https://github.com/dbushell/Pikaday).
-These files are released under the BSD & MIT licenses.
-
-
 This project includes FileSaver.js (https://github.com/eligrey/FileSaver.js), which
 is released under a permissive license.
 
@@ -171,3 +190,4 @@ Full details of all licenses can be found in the LICENSE file.
 
 
 [mirage]: http://openmirage.org/
+[CueKeeper]: https://github.com/talex5/CueKeeper

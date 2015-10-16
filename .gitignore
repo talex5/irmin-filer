@@ -1,10 +1,11 @@
 _build
 ck_init.ml
 server/Makefile
-server/cuekeeper_libvirt.xml
+server/irmin-filer_libvirt.xml
+server/irmin-filer.xl.in
 server/main.ml
 server/main.native
-server/mir-cuekeeper
+server/mir-irmin-filer
 server/static.ml
 server/static1.ml*
 server/log

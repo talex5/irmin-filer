@@ -9,16 +9,8 @@ module type S = sig
   include REV
   open Node.Types
 
-  val make : time:Ck_time.user_date -> commit -> t Lwt.t
-  val disk_node : [< Node.generic] -> Ck_disk_node.generic
-  val apa_node : [< area | project | action] ->
-    [ Ck_disk_node.Types.area | Ck_disk_node.Types.project | Ck_disk_node.Types.action ]
-
-  val action_node : action -> Ck_disk_node.Types.action
-  val project_node : project -> Ck_disk_node.Types.project
-  val area_node : area -> Ck_disk_node.Types.area
-  val context_node : context -> Ck_disk_node.Types.context
-  val contact_node : contact -> Ck_disk_node.Types.contact
+  val make : commit -> t Lwt.t
+  val action_node : file -> string
 end
 
 module Make(Git : Git_storage_s.S) : S with type commit = Git.Commit.t

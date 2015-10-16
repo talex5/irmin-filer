@@ -42,6 +42,6 @@ let main =
 let conf = crunch "conf"
 
 let () =
-  register "cuekeeper" [
+  register "irmin-filer" [
     main $ stack default_console $ conf $ default_clock
   ]

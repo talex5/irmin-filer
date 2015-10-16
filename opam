@@ -1,28 +1,22 @@
 opam-version: "1.2"
-name: "cuekeeper"
+name: "irmin-filer"
 version: "dev"
 maintainer: "Thomas Leonard <talex5@gmail.com>"
 authors: "Thomas Leonard <talex5@gmail.com>"
-homepage: "https://github.com/talex5/cuekeeper"
-bug-reports: "https://github.com/talex5/cuekeeper/issues"
+homepage: "https://github.com/talex5/irmin-filer"
+bug-reports: "https://github.com/talex5/irmin-filer/issues"
 license: "GNU LESSER GENERAL PUBLIC LICENSE, v2.1"
-dev-repo: "https://github.com/talex5/cuekeeper.git"
+dev-repo: "https://github.com/talex5/irmin-filer.git"
 build: [
   [make "client"]
-]
-build-test: [
-  [make "test"]
-  [make "slow_test"]
 ]
 depends: [
   "base64"
   "sexplib"
-  "uuidm"
   "irmin"
   "tyxml"
   "reactiveData"
   "js_of_ocaml"
-  "omd"
   "ounit" {build}
   "tar-format"
   "cohttp"

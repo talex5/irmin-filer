@@ -5,39 +5,21 @@ open Ck_utils
 
 type stop = unit -> unit
 type 'a or_error = [ `Ok of 'a | `Error of string ]
-type action_state = [ `Next | `Waiting | `Waiting_for_contact | `Waiting_until of Ck_time.user_date | `Future | `Done ]
-type project_state = [ `Active | `SomedayMaybe | `Done ]
 
 module type DISK_NODE = sig
   module Types : sig
     type action_node
     type project_node
-    type area_node
-    type contact_node
-    type context_node
 
-    type action = [`Action of action_node]
-    type project = [`Project of project_node]
-    type area = [`Area of area_node]
-    type contact = [`Contact of contact_node]
-    type context = [`Context of context_node]
+    type file = [`File of action_node]
+    type dir = [`Dir of project_node]
   end
   open Types
 
-  type generic = [ area | project | action | contact | context ]
+  type generic = [ dir | file ]
 
-  val parent : [< area | project | action ] -> Ck_id.t option
-  val name : [< generic ] -> string
-  val description : [< generic] -> string
-  val ctime : [< generic ] -> float
+  val description : file -> string
   val conflicts : [< generic ] -> string list
-  val starred : [< project | action] -> bool
-  val action_state : action -> action_state
-  val action_repeat : action -> Ck_time.repeat option
-  val project_state : project -> project_state
-  val is_done : [< project | action] -> bool
-  val context : action -> Ck_id.t option
-  val contact : [< area | project | action ] -> Ck_id.t option
 end
 
 module type EQ = sig
@@ -76,16 +58,19 @@ module type GUI_DATA = sig
   (** For extra data the GUI wants to attach to tree nodes. *)
 end
 
-type problem =
-  [ `No_next_action
-  | `Unread_conflicts
-  | `Incomplete_child ]
+type problem = [ `Unread_conflicts ]
 
 module type REV = sig
   type t
 
   module Node : sig
     include DISK_NODE
+
+    val name : [< generic ] -> string
+
+    val parent : [< generic ] -> Ck_id.t
+    val with_parent : Ck_id.t -> [< generic ] -> generic
+
     val rev : [< generic] -> t
 
     val uuid : [< generic ] -> Ck_id.t
@@ -96,50 +81,29 @@ module type REV = sig
     val equal : [< generic] -> [< generic] -> bool
     (** Note that the rev field is ignored, so nodes from different commits can
      * be equal. *)
-
-    val is_due : Types.action -> bool
-    (** [true] if this is a waiting action due at or before the time
-     * this revision was loaded. *)
   end
   open Node.Types
 
   type commit
 
   val equal : t -> t -> bool
-  val child_nodes : [< area | project | action ] -> [ area | project | action ] M.t
+  val child_nodes : [< dir | file ] -> [ dir | file ] M.t
 
-  val roots : t -> [ area | project | action ] M.t
+  val roots : t -> [ dir | file ] M.t
   val commit : t -> commit
 
-  val nodes : t -> [ area | project | action] Ck_id.M.t
+  val nodes : t -> [ dir | file] Ck_id.M.t
 
-  val contacts : t -> contact Ck_id.M.t
-  val nodes_of_contact : contact -> [ area | project | action ] list
-  val contact_for : [< area | project | action ] -> contact option
+  val get : t -> Ck_id.t -> [ dir | file ] option
 
-  val contexts : t -> context Ck_id.M.t
-  val actions_of_context : context -> action list
-
-  val get : t -> Ck_id.t -> [ area | project | action ] option
-  val get_contact : t -> Ck_id.t -> [> contact] option
-  val get_context : t -> Ck_id.t -> [> context] option
-
-  val parent : t -> [< area | project | action] -> [ area | project | action ] option
-  val context : action -> context option
-
-  val schedule : t -> action list
-  (** The ([`Waiting_until time] actions, earliest first. *)
+  val parent : t -> [< dir | file] -> [ dir | file ] option
 
   val problems : t -> (Node.generic * problem) list
   (** A list of nodes and problems to report. *)
 
   val alert : t -> bool
-  (** Alert the user that action is required.
-   * Currently, this is true when a [`Waiting_until] action is due, or
-   * [problems t] is non-empty. *)
-
-  val expires : t -> Ck_time.user_date option
-  (** Will need to reload at this time (this is when the next scheduled action becomes due). *)
+  (** Alert the user that file is required.
+   * Currently, this is true when [problems t] is non-empty. *)
 end
 
 type 'a or_cancelled =

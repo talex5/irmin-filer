@@ -1,9 +1,9 @@
 (* Copyright (C) 2015, Thomas Leonard
  * See the README file for details. *)
 
-type t = private string with sexp
+type t = Irmin.Path.String_list.t
 
-val mint : unit -> t
+val root : t
 val to_string : t -> string
 val of_string : string -> t
 val fmt : unit -> t -> string

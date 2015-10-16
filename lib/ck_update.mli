@@ -13,7 +13,7 @@ module Make(Git : Git_storage_s.S)
 
   open R.Node.Types
 
-  val make : on_update:update_cb Lwt.t -> Git.Branch.t -> t Lwt.t
+  val make : repo:Git.Repository.t -> on_update:update_cb Lwt.t -> Git.Branch.t -> t Lwt.t
   (** Manage updates to this branch.
    * Calls [on_update] after the branch has changed (either due to the methods below or because
    * the store has been modified by another process. *)
@@ -42,33 +42,19 @@ module Make(Git : Git_storage_s.S)
    * When they return, on_update has completed for the new revision. *)
 
   val add : t ->
-    parent:[`Toplevel of R.t | `Node of [< area | project ]] ->
-    (?parent:Ck_id.t -> ctime:float -> unit -> [ Ck_disk_node.Types.area | Ck_disk_node.Types.project | Ck_disk_node.Types.action]) ->
-    Ck_id.t Lwt.t
-  val add_contact : t -> base:R.t -> Ck_disk_node.Types.contact -> Ck_id.t Lwt.t
-  val add_context : t -> base:R.t -> Ck_disk_node.Types.context -> Ck_id.t Lwt.t
+    base:R.t ->
+    path:Ck_id.t ->
+    (unit -> [ Ck_disk_node.Types.dir | Ck_disk_node.Types.file]) ->
+    unit Lwt.t
   val delete : t -> ?msg:string -> [< R.Node.generic] list -> unit or_error Lwt.t
-  val clear_conflicts : t -> [< R.Node.generic] -> unit Lwt.t
 
-  val set_name : t -> [< R.Node.generic ] -> string -> unit Lwt.t
-  val set_description : t -> [< R.Node.generic ] -> string -> unit Lwt.t
-  val set_starred : t -> [< action | project] -> bool -> unit Lwt.t
-  val set_action_state : t -> action -> [< action_state ] -> unit Lwt.t
-  val set_repeat : t -> action -> Ck_time.repeat option -> unit Lwt.t
-  val set_waiting_for : t -> action -> contact -> unit Lwt.t
-  val set_project_state : t -> project -> [ `Active | `SomedayMaybe | `Done ] -> unit Lwt.t
-  val set_context : t -> action -> context option -> unit Lwt.t
-  val set_contact : t -> [< area | project | action] -> contact option -> unit Lwt.t
+  val set_name : t -> [< R.Node.generic ] -> Ck_id.t -> unit Lwt.t
+  val set_description : t -> R.Node.Types.file -> string -> unit Lwt.t
 
-  val set_a_parent : t -> area -> area -> unit Lwt.t
-  val set_pa_parent : t -> [< project | action] -> [< area | project] -> unit Lwt.t
-  val remove_parent : t -> [< area | project | action] -> unit Lwt.t
+  val move_into : t -> [< dir | file] -> Ck_id.t -> unit Lwt.t
+  val remove_parent : t -> [< dir | file] -> unit Lwt.t
 
-  val convert_to_area : t -> project -> unit or_error Lwt.t
-  val convert_to_project : t -> [< action | area] -> unit or_error Lwt.t
-  val convert_to_action : t -> project -> unit or_error Lwt.t
-
-  val revert : t -> repo:Git.Repository.t -> Git_storage_s.Log_entry.t -> unit or_error Lwt.t
+  val revert : t -> Git_storage_s.Log_entry.t -> unit or_error Lwt.t
 
   val sync : t -> from:Git.Commit.t -> unit or_error Lwt.t
 end
